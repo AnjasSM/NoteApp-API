@@ -2,20 +2,20 @@ const response = require('./response');
 const connection = require('./connect');
 
 
-exports.home = (req,res) => {
+exports.home = (req, res) => {
    response.dataResponse('Note App Home', res)
 }
 
 // add note to db
-exports.notes = (req,res) => {
+exports.notes = (req, res) => {
    let title = req.body.title;
    let note = req.body.note;
-   let catId = req.body.id_category;
+   let id_category = req.body.id_category;
    connection.query(
       `INSERT into notes set title=?, note=?, time=now(), id_category=?`,
-      [title,note,catId],
-      (err,rows,fields) => {
-         if(err) {
+      [title, note, id_category],
+      (err, rows, fields) => {
+         if (err) {
             throw err
          } else {
             return res.send({
@@ -29,10 +29,10 @@ exports.notes = (req,res) => {
 }
 
 //read note from db
-exports.readNotes = (res) => {
+exports.readNotes = (req, res) => {
    connection.query(
-      'SELECT * from notes',(err,rows,fields) => {
-         if(err) {
+      'SELECT * from notes', (err, rows, fields) => {
+         if (err) {
             throw err
          } else {
             return res.send({
@@ -46,13 +46,13 @@ exports.readNotes = (res) => {
 }
 
 //read note by id from db
-exports.notesById = (res) => {
-   let id = req.body.id;
+exports.notesById = (req, res) => {
+   let id = req.params.id;
    connection.query(
       'SELECT * from notes where id = ?',
       [id],
-      (err,rows,fields) => {
-         if(err) {
+      (err, rows, fields) => {
+         if (err) {
             throw err
          } else {
             return res.send({
@@ -66,13 +66,12 @@ exports.notesById = (res) => {
 }
 
 //delete note from db by note id
-exports.deleteNote = (req,res) => {
-   let id = req.body.id;
+exports.deleteNote = (req, res) => {
+   let id = req.params.id;
    connection.query(
-      `DELETE from notes where id=?`,
-      [id],
-      (err,rows,fields) => {
-         if(err) {
+      `DELETE from notes where id=${id}`,
+      (err, rows, fields) => {
+         if (err) {
             throw err
          } else {
             return res.send({
@@ -86,16 +85,16 @@ exports.deleteNote = (req,res) => {
 }
 
 //update note from db by id
-exports.updateNote = (req,res) => {
-   let id = req.body.id;
+exports.updateNote = (req, res) => {
+   let id = req.params.id;
    let title = req.body.title;
    let note = req.body.note;
    let catId = req.body.id_category;
    connection.query(
-      `UPDATE notes set title=?,note=?,id_category=?,id=?`,
-      [id,title,note,catId],
-      (err,rows,fields) => {
-         if(err) {
+      `UPDATE notes set title=?,note=?,id_category=? where id=?`,
+      [title, note, catId, id],
+      (err, rows, fields) => {
+         if (err) {
             throw err
          } else {
             return res.send({
@@ -109,13 +108,13 @@ exports.updateNote = (req,res) => {
 }
 
 //add category to db
-exports.categories = (req,res) => {
-   let title = req.body.categories;
+exports.categories = (req, res) => {
+   let categories = req.body.categories;
    connection.query(
       `INSERT into categories set category=?`,
-      [title],
-      (err,rows,fields) => {
-         if(err) {
+      [categories],
+      (err, rows, fields) => {
+         if (err) {
             throw err
          } else {
             return res.send({
@@ -129,10 +128,10 @@ exports.categories = (req,res) => {
 }
 
 //read category from db
-exports.readCategories = (res) => {
+exports.readCategories = (req, res) => {
    connection.query(
-      'SELECT * from categories',(err,rows,fields) => {
-         if(err) {
+      'SELECT * from categories', (err, rows, fields) => {
+         if (err) {
             throw err
          } else {
             return res.send({
@@ -146,13 +145,13 @@ exports.readCategories = (res) => {
 }
 
 //read category by id from db
-exports.categoriesById = (res) => {
-   let id = req.body.id;
+exports.categoriesById = (req, res) => {
+   let id = req.params.id;
    connection.query(
-      'SELECT * from categories where id = ?',
+      'SELECT * from categories where id=?',
       [id],
-      (err,rows,fields) => {
-         if(err) {
+      (err, rows, fields) => {
+         if (err) {
             throw err
          } else {
             return res.send({
@@ -166,13 +165,13 @@ exports.categoriesById = (res) => {
 }
 
 //delete category from db by category id
-exports.deleteCategory = (req,res) => {
+exports.deleteCategory = (req, res) => {
    let id = req.body.id;
    connection.query(
       `DELETE from categories where id=?`,
       [id],
-      (err,rows,fields) => {
-         if(err) {
+      (err, rows, fields) => {
+         if (err) {
             throw err
          } else {
             return res.send({
@@ -186,14 +185,14 @@ exports.deleteCategory = (req,res) => {
 }
 
 //update category from db by id
-exports.updateCategory = (req,res) => {
+exports.updateCategory = (req, res) => {
    let id = req.body.id;
    let category = req.body.category;
    connection.query(
-      `UPDATE notes set category=?,id=?`,
-      [category,id],
-      (err,rows,fields) => {
-         if(err) {
+      `UPDATE categories set category=?,id=?`,
+      [category, id],
+      (err, rows, fields) => {
+         if (err) {
             throw err
          } else {
             return res.send({
