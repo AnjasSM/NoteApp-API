@@ -31,27 +31,82 @@ exports.notes = (req, res) => {
    )
 }
 
-//read note from db
 exports.readNotes = (req, res) => {
+   const { search } = req.query;
+   const { sort } = req.query;
+   const { page } = req.query;
+   const { limit } = req.query;
+   let sql = `SELECT 
+            notes.id,notes.title,notes.note,notes.time,notes.id_category, categories.category
+               FROM
+            notes
+               INNER JOIN
+            categories ON notes.id_category = categories.id `
+   let start = 0;
+   if(search) {
+      sql +=`LIKE '%${search}%'`;
    connection.query(
-      `SELECT 
-         notes.id,notes.title,notes.note,notes.time,notes.id_category, categories.category
-      FROM
-         notes
-          INNER JOIN
-      categories ON notes.id_category = categories.id;`, (err, rows, fields) => {
+      sql, (err, rows, fields) => {
          if (err) {
             throw err
          } else {
             return res.send({
                error: false,
                data: rows,
-               message: 'notes has been showed',
+               message: `${search} data has been showed`,
             });
          }
       }
    )
-}
+   } else if(sort === 'DESC') {
+      sql +=`ORDER BY id DESC`;
+      connection.query(
+         sql, (err, rows, fields) => {
+            if (err) {
+               throw err
+            } else {
+               return res.send({
+                  error: false,
+                  data: rows,
+                  message: 'notes has been showed',
+               });
+            }
+         }
+      )
+   } else if(page && limit) {
+      if(page > 1) {
+         start = (page * limit) - limit
+      }
+      sql += `LIMIT ${start},${limit}`
+      connection.query(
+         sql,(err, rows, fields) => {
+            if (err) {
+               throw err
+            } else {
+               return res.send({
+                  error: false,
+                  data: rows,
+                  message: `notes on page: ${page}`
+               })
+            }
+         }
+      )
+   } else if(!search || !sort || sort === "ASC" || !page && !limit) {
+      connection.query(
+         sql, (err, rows, fields) => {
+            if (err) {
+               throw err
+            } else {
+               return res.send({
+                  error: false,
+                  data: rows,
+                  message: 'notes has been showed',
+               });
+            }
+         }
+      )
+      }
+   }
 
 //read note by id from db
 exports.notesById = (req, res) => {

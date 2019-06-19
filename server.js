@@ -17,10 +17,10 @@ app.use(
 app.use(bodyParser.json());
 
 //cors
-var whitelist = ['http://192.168.6.178:4000/note', 'http://192.168.6.152','http://localhost:4000/']
+var whitelist = ['http://192.168.6.178:4000/notes', 'http://192.168.6.152','http://localhost:4000/','chrome-extension://fhbjgbiflinjbdggehcddcbncdddomop','http://localhost:']
 var corsOptions = {
   origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1 || origin === undefined) {
+    if (whitelist.indexOf(origin) !== -1 || origin == undefined) {
       callback(null, true)
     } else {
       callback(new Error('Not allowed by CORS'))

@@ -3,6 +3,9 @@ module.exports = (app) => {
     //GET
     app.get('/',controller.home)
     app.get('/notes',controller.readNotes)
+    app.get('/notes?search=',controller.readNotes)
+    app.get('/notes?sort=',controller.readNotes)
+    app.get('/notes?page=&limit=',controller.readNotes)
     app.get('/notes/:id',controller.notesById)
     app.get('/categories',controller.readCategories)
     app.get('/categories/:id',controller.categoriesById)
