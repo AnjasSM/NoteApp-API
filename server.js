@@ -1,8 +1,11 @@
+require('dotenv').config();
 const express = require ('express');
 const app = express();
 const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const routes = require('./routes');
+const cors = require('cors');
+
 
 //body-parser
 app.use(
@@ -10,19 +13,25 @@ app.use(
         extended: true,
     })
 )
-
+ 
 app.use(bodyParser.json());
 
 //cors
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*")
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-    res.header("Access-Control-Allow-Methods", "GET,FETCH,POST,DELETE")
-    next()
-  })
-  
-routes(app)
+var whitelist = ['http://192.168.6.178:4000/note', 'http://192.168.6.152','http://localhost:4000/']
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1 || origin === undefined) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+}
+ 
+app.use(cors(corsOptions));
 
+//route
+routes(app)
 
 //listening port
 app.listen(port, () => {

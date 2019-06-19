@@ -2,17 +2,17 @@ module.exports = (app) => {
     const controller = require('./controller')
     //GET
     app.get('/',controller.home)
-    app.get('/note',controller.readNotes)
-    app.get('/note/:id',controller.notesById)
-    app.get('/category',controller.readCategories)
-    app.get('/category/:id',controller.categoriesById)
+    app.get('/notes',controller.readNotes)
+    app.get('/notes/:id',controller.notesById)
+    app.get('/categories',controller.readCategories)
+    app.get('/categories/:id',controller.categoriesById)
     //POST
-    app.post('/note',controller.notes)
-    app.post('/category',controller.categories)
+    app.post('/notes',controller.notes)
+    app.post('/categories',controller.categories)
     //PATCH
-    app.patch('/note/:id',controller.updateNote)
-    app.patch('/category/:id',controller.updateCategory)
+    app.patch('/notes/:id',controller.updateNote)
+    app.patch('/categories/:id',controller.updateCategory)
     //DELETE
-    app.delete('/note/:id',controller.deleteNote)
-    app.delete('/category/:id',controller.deleteCategory)
+    app.delete('/notes/:id',controller.deleteNote)
+    app.delete('/categories/:id',controller.deleteCategory)
 }

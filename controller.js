@@ -1,5 +1,7 @@
 const response = require('./response');
 const connection = require('./connect');
+const moment = require('moment');
+const time = moment();
 
 
 exports.home = (req, res) => {
@@ -11,9 +13,10 @@ exports.notes = (req, res) => {
    let title = req.body.title;
    let note = req.body.note;
    let id_category = req.body.id_category;
+   let date = time.format('L');
    connection.query(
-      `INSERT into notes set title=?, note=?, time=now(), id_category=?`,
-      [title, note, id_category],
+      `INSERT into notes set title=?, note=?, time=?, id_category=?`,
+      [title, note, date, id_category],
       (err, rows, fields) => {
          if (err) {
             throw err
@@ -31,7 +34,12 @@ exports.notes = (req, res) => {
 //read note from db
 exports.readNotes = (req, res) => {
    connection.query(
-      'SELECT * from notes', (err, rows, fields) => {
+      `SELECT 
+         notes.id,notes.title,notes.note,notes.time,notes.id_category, categories.category
+      FROM
+         notes
+          INNER JOIN
+      categories ON notes.id_category = categories.id;`, (err, rows, fields) => {
          if (err) {
             throw err
          } else {
