@@ -34,43 +34,52 @@ exports.readNotes = (req, res) => {
    const { search } = req.query;
    const { sort } = req.query;
    const { page } = req.query;
-   const { limit } = req.query;
+   let { limit } = req.query;
+   let start = 0;
    let sql = `SELECT notes.id, notes.title, notes.note, notes.created_at,
             notes.updated_at, categories.category FROM notes INNER JOIN
             categories ON notes.id_category = categories.id`
-   let start = 0;
+   limit = 10
    //search by title from db
    if(search) {
       sql +=` WHERE title LIKE '%${search}%'`;
    //sort db table descendingly
-   } if(sort === 'DESC') {
+   } if(sort) {
       if(sort === 'DESC') {
          sql +=` ORDER BY created_at DESC`;
       } else {
          sql +=` ORDER BY created_at ASC`;
       }
-      //get notes in page and give limit per page
+   //get notes in page and give limit per page
    } if(page && limit) {
       if(page > 1) {
          start = (page * limit) - limit
       }
-      sql += ` LIMIT ${start},${limit}`
-      //sort Ascendingly or if url didn't have search/sort/page and limit query
-   } connection.query(
+   //sort Ascendingly or if url didn't have search/sort/page and limit query
+   }
+   sql += ` LIMIT ${start},${limit}`
+   const sqlToCount = `SELECT COUNT(*) as tot FROM notes`
+   connection.query(
          sql,(err, rows, fields) => {
-            console.log(rows)
             if (err) {
                throw err
             } else {
-               return res.send({
-                  error: false,
-                  data: rows,
-                  message: `notes has been showed`
+               connection.query(sqlToCount,(err,result,fields) => {
+                  if (err) {
+                     throw err
+                  } else {
+                     let total = result[0].tot;
+                     let totalPage = Math.ceil(total/10);
+                     let currpage = parseInt(page);
+                     let limit = 10;
+                     let toCount = [total,totalPage,currpage,limit]
+                     response.getCountData(rows, toCount, res) ;
+                  }
                })
             }
          }
       )
-      console.log(sql)
+      
    }
 
 //read note by id from db
