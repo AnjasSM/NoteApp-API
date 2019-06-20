@@ -9,9 +9,9 @@ exports.home = (req, res) => {
 
 // add note to db
 exports.notes = (req, res) => {
-   let title = req.body.title;
-   let note = req.body.note;
-   let id_category = req.body.id_category;
+   let { title } = req.body;
+   let { note } = req.body;
+   let { id_category } = req.body;
    let date = time.format('L');
    connection.query(
       `INSERT into notes set title=?, note=?, time=?, id_category=?`,
@@ -36,80 +36,42 @@ exports.readNotes = (req, res) => {
    const { sort } = req.query;
    const { page } = req.query;
    const { limit } = req.query;
-   let sql = `SELECT 
-            notes.id,notes.title,notes.note,notes.time,notes.id_category, categories.category
-               FROM
-            notes
-               INNER JOIN
-            categories ON notes.id_category = categories.id `
+   let sql = `SELECT notes.id, notes.title, notes.note, notes.time,
+            categories.category FROM notes INNER JOIN categories
+            ON notes.id_category = categories.id`
    let start = 0;
    //search by title from db
    if(search) {
-      sql +=`LIKE '%${search}%'`;
-   connection.query(
-      sql, (err, rows, fields) => {
-         if (err) {
-            throw err
-         } else {
-            return res.send({
-               error: false,
-               data: rows,
-               message: `${search} data has been showed`,
-            });
-         }
-      }
-   )
+      sql +=` WHERE title LIKE '%${search}%'`;
    //sort db table descendingly
-   } else if(sort === 'DESC') {
-      sql +=`ORDER BY id DESC`;
-      connection.query(
-         sql, (err, rows, fields) => {
-            if (err) {
-               throw err
-            } else {
-               return res.send({
-                  error: false,
-                  data: rows,
-                  message: 'notes has been showed',
-               });
-            }
-         }
-      )
+   } if(sort === 'DESC') {
+      if(sort === 'DESC') {
+         sql +=` ORDER BY time DESC`;
+      } else {
+         sql +=` ORDER BY time ASC`;
+      }
       //get notes in page and give limit per page
-   } else if(page && limit) {
+   } if(page && limit) {
       if(page > 1) {
          start = (page * limit) - limit
       }
-      sql += `LIMIT ${start},${limit}`
-      connection.query(
+      sql += ` LIMIT ${start},${limit}`
+      //sort Ascendingly or if url didn't have search/sort/page and limit query
+   } connection.query(
          sql,(err, rows, fields) => {
+            console.log(rows)
             if (err) {
                throw err
             } else {
                return res.send({
                   error: false,
                   data: rows,
-                  message: `notes on page: ${page}`
+                  message: `notes has been showed`
                })
             }
          }
       )
-      //sort Ascendingly or if url didn't have search/sort/page and limit query
-   } else if(!search || !sort || sort === "ASC" || !page && !limit) {
-      connection.query(
-         sql, (err, rows, fields) => {
-            if (err) {
-               throw err
-            } else {
-               return res.send({
-                  error: false,
-                  data: rows,
-                  message: 'notes has been showed',
-               });
-            }
-         }
-      )
-      }
+      console.log(sql)
    }
 
 //read note by id from db

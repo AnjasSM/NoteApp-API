@@ -1,6 +1,6 @@
 exports.dataResponse = function (values, res) {
     const data = {
-        status: 200,
+        status: 'sucess',
         values: values,
     };
     res.json(data),
