@@ -13,10 +13,9 @@ exports.notes = (req, res) => {
    let { note } = req.body;
    let { id_category } = req.body;
    let date = time.format('L');
+   let sql = `INSERT into notes set title=?, note=?, created_at=?, id_category=?`;
    connection.query(
-      `INSERT into notes set title=?, note=?, time=?, id_category=?`,
-      [title, note, date, id_category],
-      (err, rows, fields) => {
+      sql, [title, note, date, id_category], (err, rows, fields) => {
          if (err) {
             throw err
          } else {
@@ -36,9 +35,9 @@ exports.readNotes = (req, res) => {
    const { sort } = req.query;
    const { page } = req.query;
    const { limit } = req.query;
-   let sql = `SELECT notes.id, notes.title, notes.note, notes.time,
-            categories.category FROM notes INNER JOIN categories
-            ON notes.id_category = categories.id`
+   let sql = `SELECT notes.id, notes.title, notes.note, notes.created_at,
+            notes.updated_at, categories.category FROM notes INNER JOIN
+            categories ON notes.id_category = categories.id`
    let start = 0;
    //search by title from db
    if(search) {
@@ -46,9 +45,9 @@ exports.readNotes = (req, res) => {
    //sort db table descendingly
    } if(sort === 'DESC') {
       if(sort === 'DESC') {
-         sql +=` ORDER BY time DESC`;
+         sql +=` ORDER BY created_at DESC`;
       } else {
-         sql +=` ORDER BY time ASC`;
+         sql +=` ORDER BY created_at ASC`;
       }
       //get notes in page and give limit per page
    } if(page && limit) {
@@ -79,8 +78,7 @@ exports.notesById = (req, res) => {
    let id = req.params.id;
    connection.query(
       'SELECT * from notes where id = ?',
-      [id],
-      (err, rows, fields) => {
+      [id], (err, rows, fields) => {
          if (err) {
             throw err
          } else {
@@ -97,9 +95,9 @@ exports.notesById = (req, res) => {
 //delete note from db by note id
 exports.deleteNote = (req, res) => {
    let id = req.params.id;
+   let sql = `DELETE from notes where id=${id}`;
    connection.query(
-      `DELETE from notes where id=${id}`,
-      (err, rows, fields) => {
+      sql, (err, rows, fields) => {
          if (err) {
             throw err
          } else {
@@ -119,10 +117,10 @@ exports.updateNote = (req, res) => {
    let title = req.body.title;
    let note = req.body.note;
    let catId = req.body.id_category;
+   let updateTime = time.format('L');
+   let sql = `UPDATE notes set title=?, note=?, updated_at=?, id_category=? where id=?`
    connection.query(
-      `UPDATE notes set title=?,note=?,id_category=? where id=?`,
-      [title, note, catId, id],
-      (err, rows, fields) => {
+      sql, [title, note, updateTime, catId, id], (err, rows, fields) => {
          if (err) {
             throw err
          } else {
@@ -139,10 +137,9 @@ exports.updateNote = (req, res) => {
 //add category to db
 exports.categories = (req, res) => {
    let categories = req.body.categories;
+   let sql = `INSERT into categories set category=?`;
    connection.query(
-      `INSERT into categories set category=?`,
-      [categories],
-      (err, rows, fields) => {
+      sql, [categories], (err, rows, fields) => {
          if (err) {
             throw err
          } else {
@@ -158,8 +155,9 @@ exports.categories = (req, res) => {
 
 //read category from db
 exports.readCategories = (req, res) => {
+   let sql = 'SELECT * from categories';
    connection.query(
-      'SELECT * from categories', (err, rows, fields) => {
+      sql, (err, rows, fields) => {
          if (err) {
             throw err
          } else {
@@ -176,10 +174,9 @@ exports.readCategories = (req, res) => {
 //read category by id from db
 exports.categoriesById = (req, res) => {
    let id = req.params.id;
+   let sql = 'SELECT * from categories where id=?';
    connection.query(
-      'SELECT * from categories where id=?',
-      [id],
-      (err, rows, fields) => {
+      sql, [id], (err, rows, fields) => {
          if (err) {
             throw err
          } else {
@@ -196,10 +193,9 @@ exports.categoriesById = (req, res) => {
 //delete category from db by category id
 exports.deleteCategory = (req, res) => {
    let id = req.body.id;
+   let sql = `DELETE from categories where id=?`;
    connection.query(
-      `DELETE from categories where id=?`,
-      [id],
-      (err, rows, fields) => {
+      sql, [id], (err, rows, fields) => {
          if (err) {
             throw err
          } else {
@@ -217,10 +213,9 @@ exports.deleteCategory = (req, res) => {
 exports.updateCategory = (req, res) => {
    let id = req.body.id;
    let category = req.body.category;
+   let sql = `UPDATE categories set category=?,id=?`
    connection.query(
-      `UPDATE categories set category=?,id=?`,
-      [category, id],
-      (err, rows, fields) => {
+      sql, [category, id], (err, rows, fields) => {
          if (err) {
             throw err
          } else {
