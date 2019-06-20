@@ -3,7 +3,6 @@ const connection = require('./connect');
 const moment = require('moment');
 const time = moment();
 
-
 exports.home = (req, res) => {
    response.dataResponse('Note App Home', res)
 }
@@ -31,6 +30,7 @@ exports.notes = (req, res) => {
    )
 }
 
+//read notes from db
 exports.readNotes = (req, res) => {
    const { search } = req.query;
    const { sort } = req.query;
@@ -43,6 +43,7 @@ exports.readNotes = (req, res) => {
                INNER JOIN
             categories ON notes.id_category = categories.id `
    let start = 0;
+   //search by title from db
    if(search) {
       sql +=`LIKE '%${search}%'`;
    connection.query(
@@ -58,6 +59,7 @@ exports.readNotes = (req, res) => {
          }
       }
    )
+   //sort db table descendingly
    } else if(sort === 'DESC') {
       sql +=`ORDER BY id DESC`;
       connection.query(
@@ -73,6 +75,7 @@ exports.readNotes = (req, res) => {
             }
          }
       )
+      //get notes in page and give limit per page
    } else if(page && limit) {
       if(page > 1) {
          start = (page * limit) - limit
@@ -91,6 +94,7 @@ exports.readNotes = (req, res) => {
             }
          }
       )
+      //sort Ascendingly or if url didn't have search/sort/page and limit query
    } else if(!search || !sort || sort === "ASC" || !page && !limit) {
       connection.query(
          sql, (err, rows, fields) => {
