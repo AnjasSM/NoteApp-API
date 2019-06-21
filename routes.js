@@ -7,7 +7,7 @@ module.exports = (app) => {
     app.get('/categories',controller.readCategories)
     app.get('/categories/:id',controller.categoriesById)
     //POST
-    app.post('/notes',controller.notes)
+    app.post('/notes',controller.addNotes)
     app.post('/categories',controller.categories)
     //PATCH
     app.patch('/notes/:id',controller.updateNote)

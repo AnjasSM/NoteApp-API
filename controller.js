@@ -8,14 +8,13 @@ exports.home = (req, res) => {
 }
 
 // add note to db
-exports.notes = (req, res) => {
+exports.addNotes = (req, res) => {
    let { title } = req.body;
    let { note } = req.body;
    let { id_category } = req.body;
-   let date = time.format('L');
-   let sql = `INSERT into notes set title=?, note=?, created_at=?, id_category=?`;
+   let sql = `INSERT into notes set title=?, note=?, created_at=now(), id_category=?`;
    connection.query(
-      sql, [title, note, date, id_category], (err, rows, fields) => {
+      sql, [title, note, id_category], (err, rows, fields) => {
          if (err) {
             throw err
          } else {
@@ -31,49 +30,46 @@ exports.notes = (req, res) => {
 
 //read notes from db
 exports.readNotes = (req, res) => {
-   const { search } = req.query;
-   const { sort } = req.query;
-   const { page } = req.query;
-   let { limit } = req.query;
+   const { search, sort } = req.query;
+   const page = req.query.page || 1;
+   let limit = req.query.limit || 10;
    let start = 0;
    let sql = `SELECT notes.id, notes.title, notes.note, notes.created_at,
             notes.updated_at, categories.category FROM notes INNER JOIN
             categories ON notes.id_category = categories.id`
-   limit = 10
    //search by title from db
    if(search) {
       sql +=` WHERE title LIKE '%${search}%'`;
    //sort db table descendingly
-   } if(sort) {
-      if(sort === 'DESC') {
-         sql +=` ORDER BY created_at DESC`;
-      } else {
+   } if(sort || !sort) {
+      if(sort === 'ASC') {
          sql +=` ORDER BY created_at ASC`;
+      } else {
+         sql +=` ORDER BY created_at DESC`;
       }
    //get notes in page and give limit per page
    } if(page && limit) {
       if(page > 1) {
          start = (page * limit) - limit
       }
-   //sort Ascendingly or if url didn't have search/sort/page and limit query
    }
-   sql += ` LIMIT ${start},${limit}`
-   const sqlToCount = `SELECT COUNT(*) as tot FROM notes`
+   let limitQuery = ` LIMIT ${start},${limit}`
    connection.query(
-         sql,(err, rows, fields) => {
+         sql,limitQuery,(err, rows, fields) => {
+            let totalNotes = rows.length;
+            sql += limitQuery
             if (err) {
                throw err
             } else {
-               connection.query(sqlToCount,(err,result,fields) => {
+               connection.query(sql, totalNotes,(err,result,fields) => {
                   if (err) {
                      throw err
                   } else {
-                     let total = result[0].tot;
-                     let totalPage = Math.ceil(total/10);
-                     let currpage = parseInt(page);
-                     let limit = 10;
-                     let toCount = [total,totalPage,currpage,limit]
-                     response.getCountData(rows, toCount, res) ;
+                     let limit = parseInt(req.query.limit) || 10;
+                     let totalPage = Math.ceil(totalNotes/limit);
+                     let currpage = parseInt(page) || 1;
+                     let toCount = [totalNotes,currpage,totalPage,limit]
+                     response.getCountData(result, toCount, res) ;
                   }
                })
             }
@@ -126,10 +122,9 @@ exports.updateNote = (req, res) => {
    let title = req.body.title;
    let note = req.body.note;
    let catId = req.body.id_category;
-   let updateTime = time.format('L');
-   let sql = `UPDATE notes set title=?, note=?, updated_at=?, id_category=? where id=?`
+   let sql = `UPDATE notes set title=?, note=?, updated_at=now(), id_category=? where id=?`
    connection.query(
-      sql, [title, note, updateTime, catId, id], (err, rows, fields) => {
+      sql, [title, note, catId, id], (err, rows, fields) => {
          if (err) {
             throw err
          } else {
