@@ -6,7 +6,6 @@ const bodyParser = require('body-parser');
 const routes = require('./routes');
 const cors = require('cors');
 
-
 //body-parser
 app.use(
     bodyParser.urlencoded({
@@ -17,7 +16,7 @@ app.use(
 app.use(bodyParser.json());
 
 //cors
-var whitelist = ['http://192.168.6.178:4000/notes', 'http://192.168.6.152','http://localhost:4000/','chrome-extension://fhbjgbiflinjbdggehcddcbncdddomop','http://localhost:']
+var whitelist = ['http://192.168.6.178:4001/notes', 'http://192.168.6.152','http://localhost:4000/','chrome-extension://fhbjgbiflinjbdggehcddcbncdddomop','http://localhost:']
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || origin == undefined) {
@@ -33,7 +32,7 @@ app.use(cors(corsOptions));
 //route
 routes(app)
 
-//listening port
+// listening port
 app.listen(port, () => {
     console.log(`Note App Running on http://localhost:${port}/`)
 });

@@ -1,7 +1,7 @@
+'use strict'
+
 const response = require('./response');
 const connection = require('./connect');
-const moment = require('moment');
-const time = moment();
 
 exports.home = (req, res) => {
    response.dataResponse('Note App Home', res)
@@ -9,10 +9,10 @@ exports.home = (req, res) => {
 
 // add note to db
 exports.addNotes = (req, res) => {
-   let { title } = req.body;
-   let { note } = req.body;
-   let { id_category } = req.body;
-   let sql = `INSERT into notes set title=?, note=?, created_at=now(), id_category=?`;
+   let title= req.body.title;
+   let note = req.body.note;
+   let id_category = req.body.id_category;
+   let sql = `INSERT into notes set title=?, note=?, created_at=now(), updated_at=now(), id_category=?`;
    connection.query(
       sql, [title, note, id_category], (err, rows, fields) => {
          if (err) {
@@ -35,7 +35,7 @@ exports.readNotes = (req, res) => {
    let limit = req.query.limit || 10;
    let start = 0;
    let sql = `SELECT notes.id, notes.title, notes.note, notes.created_at,
-            notes.updated_at, categories.category FROM notes INNER JOIN
+            notes.updated_at, categories.category, categories.color FROM notes INNER JOIN
             categories ON notes.id_category = categories.id`
    //search by title from db
    if(search) {
@@ -43,9 +43,9 @@ exports.readNotes = (req, res) => {
    //sort db table descendingly
    } if(sort || !sort) {
       if(sort === 'ASC') {
-         sql +=` ORDER BY created_at ASC`;
+         sql +=` ORDER BY updated_at ASC`;
       } else {
-         sql +=` ORDER BY created_at DESC`;
+         sql +=` ORDER BY updated_at DESC`;
       }
    //get notes in page and give limit per page
    } if(page && limit) {
@@ -140,10 +140,10 @@ exports.updateNote = (req, res) => {
 
 //add category to db
 exports.categories = (req, res) => {
-   let categories = req.body.categories;
-   let sql = `INSERT into categories set category=?`;
+   let { categories, url_image, color } = req.body;
+   let sql = `INSERT into categories set category=?, color=?, url_image=?`;
    connection.query(
-      sql, [categories], (err, rows, fields) => {
+      sql, [categories, color, url_image], (err, rows, fields) => {
          if (err) {
             throw err
          } else {
@@ -168,7 +168,7 @@ exports.readCategories = (req, res) => {
             return res.send({
                error: false,
                data: rows,
-               message: 'categories has been showed',
+               message: 'category has been showed',
             });
          }
       }
